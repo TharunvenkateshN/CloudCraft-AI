@@ -73,7 +73,6 @@ class CompetitorService:
             
             raw_content = agent_response.output.strip()
             # Robust JSON extraction
-            match = re.search(r'\{(?:[^{}]|(?R))*\}', raw_content) # This doesn't work in python re, so let's do a simple one:
             match = re.search(r'\{.*\}', raw_content, re.DOTALL)
             if match:
                 raw_content = match.group()
