@@ -572,39 +572,59 @@ function ChronosBriefPageContent() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-[88px]">
-                      {(phase.weeks || []).map((week: any, wIdx: number) => (
-                        <Card key={wIdx} className="bg-card/30 border border-white/5 p-8 rounded-[2.5rem] shadow-xl hover:bg-white/[0.04] transition-all group/week relative overflow-hidden">
-                          <div className="space-y-6 relative z-10 flex flex-col h-full">
-                            <div className="flex justify-between items-center">
-                              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] italic">Week {week.week} — {week.theme}</p>
-                              <ArrowRight className="h-4 w-4 text-white/10 group-hover/week:text-primary transition-colors" />
+                    <div className="space-y-6 pl-[88px] relative">
+                      <div className="absolute left-[134px] top-6 bottom-6 w-px bg-white/10 border-dashed border-l" />
+                      {(phase.days || phase.weeks || []).map((dayData: any, dIdx: number) => {
+                        const dayNum = dayData.day || dayData.week;
+                        return (
+                          <div key={dIdx} className="relative flex items-stretch gap-8 group/day">
+                            <div className="w-[40px] pt-6 shrink-0 text-right relative z-10">
+                              <div className="absolute right-[-36px] top-[28px] h-3 w-3 rounded-full bg-background border-2 border-white/20 group-hover/day:border-primary group-hover/day:bg-primary/20 group-hover/day:shadow-[0_0_15px_rgba(0,183,255,0.5)] transition-all box-content" />
+                              <div className="text-[11px] font-black uppercase tracking-widest text-primary italic">Day {dayNum}</div>
                             </div>
-                            <div className="space-y-4 flex-1">
-                              {(week.tasks || []).slice(0, 2).map((task: any, tIdx: number) => (
-                                <div key={tIdx} className="flex gap-4 items-start border-l-2 border-white/5 pl-4 hover:border-primary/40 transition-all cursor-pointer">
-                                  <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="outline" className="text-[8px] font-bold uppercase tracking-widest px-2 py-0 h-4 border-white/10 text-muted-foreground">{task.platform}</Badge>
-                                      <span className="text-[11px] font-black uppercase tracking-widest">{task.content_type}</span>
-                                    </div>
-                                    <p className="text-[11px] text-muted-foreground/60 line-clamp-2 italic">"{task.description}"</p>
-                                  </div>
+
+                            <Card className="flex-1 bg-card/20 backdrop-blur-md border border-white/5 p-7 rounded-[2rem] shadow-xl hover:bg-white/[0.04] transition-all relative overflow-hidden">
+                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/0 group-hover/day:bg-primary/50 transition-colors" />
+                              <div className="space-y-6 relative z-10 flex flex-col h-full">
+                                <div className="flex justify-between items-center">
+                                  <p className="text-sm font-black text-foreground uppercase tracking-widest italic">{dayData.theme}</p>
                                 </div>
-                              ))}
-                            </div>
-                            {isAutomated ? (
-                              <Button disabled className="w-full h-10 rounded-xl bg-emerald-500/10 text-emerald-500 border-none text-[10px] font-black uppercase tracking-widest shadow-none opacity-80 mt-4">
-                                <CheckCircle2 className="h-3 w-3 mr-2" /> Auto-Queued in Engines
-                              </Button>
-                            ) : (
-                              <Button className="w-full h-10 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all shadow-none mt-4">
-                                Push to Campaign Architect <Zap className="h-3 w-3 ml-2" />
-                              </Button>
-                            )}
+                                <div className="space-y-4 flex-1">
+                                  {(dayData.tasks || []).map((task: any, tIdx: number) => (
+                                    <div key={tIdx} className="flex gap-4 items-start border-l border-white/10 pl-5 hover:border-primary/50 transition-all cursor-pointer py-1">
+                                      <div className="space-y-3 w-full">
+                                        <div className="flex items-center justify-between w-full">
+                                          <div className="flex items-center gap-3">
+                                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 border-white/10 text-muted-foreground bg-white/5 rounded-md">{task.platform}</Badge>
+                                            <span className="text-xs font-black uppercase tracking-widest text-foreground/90">{task.content_type}</span>
+                                          </div>
+                                          {task.expected_reach && task.expected_reach !== "N/A" && (
+                                            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 border border-white/5 px-2 py-0.5 rounded bg-black/20">
+                                              EST. REACH: {task.expected_reach}
+                                            </div>
+                                          )}
+                                        </div>
+                                        <p className="text-sm text-muted-foreground/80 leading-relaxed font-medium italic">"{task.description}"</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="pt-4 border-t border-white/5 flex justify-end">
+                                  {isAutomated ? (
+                                    <Button disabled className="h-10 px-6 rounded-xl bg-emerald-500/10 text-emerald-500 border-none text-[10px] font-black uppercase tracking-widest shadow-none opacity-80">
+                                      <Activity className="h-3 w-3 mr-2 animate-pulse" /> Natively Queued in Engines
+                                    </Button>
+                                  ) : (
+                                    <Button className="h-10 px-6 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all shadow-none group/btn">
+                                      Push to Campaign Architect <ArrowRight className="h-3 w-3 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </Card>
                           </div>
-                        </Card>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 ))}

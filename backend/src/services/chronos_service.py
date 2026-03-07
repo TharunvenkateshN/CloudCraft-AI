@@ -172,7 +172,7 @@ Duration: {duration_days} days | Budget: {budget_tier}
 Target Personas: {json.dumps(personas[:2]) if personas else "General business audience"}
 Market Signals: {market_signals_prompt_ctx}
 
-Design 3 strategic phases in theory, but ONLY return the specific details for Phase 1. Phase 1 must have 2-4 weeks. Each week must have 2-3 specific content or outreach tasks.
+Design 3 strategic phases in theory, but ONLY return the specific details for Phase 1. For Phase 1, provide a daily breakdown for exactly the first 7 days. Each day must have 1-2 specific content or outreach tasks.
 Tasks should include 'description', 'platform' (LinkedIn/Twitter/Cold Email/Internal), and 'content_type'.
 Return ONLY valid JSON.
 {{
@@ -182,10 +182,10 @@ Return ONLY valid JSON.
       "start_day": 1,
       "end_day": 30,
       "objective": "Clear strategic objective",
-      "weeks": [
+      "days": [
         {{
-          "week": 1,
-          "theme": "Weekly Theme",
+          "day": 1,
+          "theme": "Launch Sequence",
           "tasks": [
             {{
               "content_type": "LinkedIn Post/Reel/Ad/Email",
