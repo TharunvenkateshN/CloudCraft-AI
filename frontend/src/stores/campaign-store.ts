@@ -82,6 +82,7 @@ interface CampaignState {
     runElapsed: number
     radarScanning: boolean
     radarResult: any | null
+    radarLogs: { ts: string; text: string }[]
 
     fetchCampaigns: () => Promise<void>
     createCampaign: (data: { name: string; goal: string; duration: string; budget: string }) => Promise<void>
@@ -123,6 +124,7 @@ export const useCampaignStore = create<CampaignState>()((set, get) => ({
     runElapsed: 0,
     radarScanning: false,
     radarResult: null,
+    radarLogs: [] as { ts: string; text: string }[],
 
     fetchCampaigns: async () => {
         set({ isFetching: true, error: null })
@@ -172,13 +174,42 @@ export const useCampaignStore = create<CampaignState>()((set, get) => ({
     },
 
     runRadarScan: async (campaignId) => {
-        set({ radarScanning: true, error: null })
+        set({ radarScanning: true, error: null, radarLogs: [] })
+
+        const mockLogs = [
+            { ts: "0.0s", text: "Initializing autonomous watchdog override..." },
+            { ts: "0.8s", text: "Deploying Tavily deep-search market agents..." },
+            { ts: "1.2s", text: "Intercepting recent competitor press & signals..." },
+            { ts: "2.5s", text: "Piping unstructured web data to AWS Comprehend..." },
+            { ts: "3.1s", text: "Extracting ORGANIZATION entities and sentiment shifts..." },
+            { ts: "3.9s", text: "Comparing deltas against DynamoDB historical baseline..." },
+        ]
+
+        let logIndex = 0;
+        const logTimer = setInterval(() => {
+            if (logIndex < mockLogs.length) {
+                set(state => ({ radarLogs: [...state.radarLogs, mockLogs[logIndex]] }))
+                logIndex++;
+            }
+        }, 600)
+
         try {
             const res = await fetch(`${API_BASE}/${campaignId}/rival-radar/scan`, { method: 'POST' })
             if (!res.ok) throw new Error('Failed to run Rival Radar scan')
             const data = await res.json()
-            set({ radarResult: data, radarScanning: false })
+
+            clearInterval(logTimer)
+            // ensure all mock logs are shown before showing final result
+            set(state => ({
+                radarResult: data,
+                radarScanning: false,
+                radarLogs: [
+                    ...mockLogs,
+                    { ts: "done", text: "Pipeline complete. Matrix payload ready." }
+                ]
+            }))
         } catch (err: any) {
+            clearInterval(logTimer)
             set({ error: err.message, radarScanning: false })
         }
     },
@@ -196,6 +227,7 @@ export const useCampaignStore = create<CampaignState>()((set, get) => ({
             runId: '',
             runElapsed: 0,
             radarResult: null,
+            radarLogs: []
         })
     },
 

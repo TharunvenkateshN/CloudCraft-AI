@@ -80,108 +80,196 @@ function BlueprintFlow({ steps, pipelineRunning }: { steps: Record<PipelineStep,
 }
 
 function RivalRadarView({ campaign }: { campaign: any }) {
-  const { runRadarScan, radarScanning, radarResult } = useCampaignStore()
+  const { runRadarScan, radarScanning, radarResult, radarLogs } = useCampaignStore()
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[400px]">
-      {/* Visual Radar Component */}
-      <div className="rounded-xl border border-border/60 bg-card/40 p-8 flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.05)_0%,transparent_70%)]" />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[500px] animate-in fade-in duration-700">
+      {/* 1. Control Tower & Visualizer */}
+      <div className="rounded-2xl border border-border/80 bg-gradient-to-b from-card/80 to-background flex flex-col p-6 shadow-xl relative overflow-hidden">
+        {/* Dynamic sweeping background */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.03)_0%,transparent_100%)] pointer-events-none" />
 
-        {radarScanning ? (
-          <div className="relative flex items-center justify-center">
-            <div className="absolute w-64 h-64 border border-emerald-500/30 rounded-full animate-ping shadow-[0_0_40px_rgba(16,185,129,0.2)]" style={{ animationDuration: '3s' }} />
-            <div className="absolute w-40 h-40 border border-emerald-500/40 rounded-full animate-ping" style={{ animationDuration: '2s' }} />
-            <div className="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-500 rounded-full flex items-center justify-center z-10 shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-              <ScanFace className="h-8 w-8 text-emerald-500 animate-pulse" />
-            </div>
+        <div className="flex items-center justify-between mb-8 z-10 w-full">
+          <div>
+            <h3 className="text-xl font-bold tracking-tight text-emerald-500 flex items-center gap-2">
+              <Radar className="h-5 w-5" /> Autonomous Watchdog
+            </h3>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest mt-1">AWS EventBridge 6h Schedule</p>
           </div>
-        ) : (
-          <div className="relative flex items-center justify-center opacity-50">
-            <div className="absolute w-64 h-64 border border-border/50 rounded-full" />
-            <div className="absolute w-40 h-40 border border-border/50 rounded-full" />
-            <div className="w-20 h-20 bg-muted border-2 border-border rounded-full flex items-center justify-center z-10">
-              <EyeOff className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </div>
-        )}
+          {radarScanning && (
+            <Badge variant="outline" className="border-emerald-500/50 text-emerald-500 bg-emerald-500/10 animate-pulse">
+              SCAN ACTIVE
+            </Badge>
+          )}
+        </div>
 
-        <div className="z-10 mt-12 text-center space-y-3 max-w-sm">
-          <h3 className="text-xl font-bold tracking-tight">Autonomous Watchdog</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Rival Radar automatically scans the competitive landscape every 6 hours via AWS EventBridge. If new competitors emerge or market sentiment drops, it fires an autonomous SNS alert.
-          </p>
+        <div className="flex-1 flex items-center justify-center relative z-10 py-4 h-[250px]">
+          {radarScanning ? (
+            <div className="relative flex items-center justify-center w-full h-full">
+              {/* Radar Rings */}
+              <div className="absolute w-44 h-44 border border-emerald-500/20 rounded-full" />
+              <div className="absolute w-28 h-28 border border-emerald-500/40 rounded-full" />
+              {/* Sweeper Line */}
+              <div className="absolute w-full h-full max-w-[180px] max-h-[180px] origin-center animate-spin" style={{ animationDuration: '3s', animationTimingFunction: 'linear' }}>
+                <div className="w-1/2 h-1/2 border-r-2 border-emerald-500 bg-gradient-to-br from-transparent to-emerald-500/20" style={{ transformOrigin: 'bottom right' }} />
+              </div>
+              {/* Targets */}
+              <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-emerald-400 rounded-full animate-ping" style={{ animationDuration: '1s' }} />
+              <div className="absolute bottom-1/3 right-1/4 w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" style={{ animationDelay: '0.4s', animationDuration: '1.2s' }} />
+
+              <div className="relative z-20 w-16 h-16 bg-card border-2 border-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                <ScanFace className="h-7 w-7 text-emerald-500 animate-pulse" />
+              </div>
+            </div>
+          ) : (
+            <div className="relative flex items-center justify-center w-full h-full">
+              <div className="absolute w-44 h-44 border border-border rounded-full opacity-30" />
+              <div className="absolute w-28 h-28 border border-border rounded-full opacity-30" />
+              <div className="relative z-20 w-16 h-16 bg-muted border border-border rounded-full flex items-center justify-center">
+                <EyeOff className="h-6 w-6 text-muted-foreground" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="z-10 mt-auto pt-6 border-t border-border/50">
           <Button
             onClick={() => runRadarScan(campaign.id)}
             disabled={radarScanning}
-            className={cx("mt-4 gap-2", radarScanning ? "" : "bg-emerald-600 hover:bg-emerald-700 text-white")}
-            size="lg"
+            className={cx("w-full h-12 text-sm font-semibold tracking-wide transition-all",
+              radarScanning ? "bg-muted text-muted-foreground border border-border"
+                : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+            )}
           >
-            {radarScanning ? <><Loader2 className="h-4 w-4 animate-spin" /> Scanning Horizon...</> : <><Radar className="h-4 w-4 shadow-sm" /> Trigger Manual Scan</>}
+            {radarScanning ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> INTERCEPTING SIGNALS...</> : <><LocateFixed className="h-4 w-4 mr-2" /> OVERRIDE SCHEDULE (SCAN NOW)</>}
           </Button>
+          <p className="text-[10px] text-center text-muted-foreground mt-3 leading-relaxed">
+            Pressing this simulates the AWS EventBridge Cron override to manually invoke the scanning watchdog pipeline.
+          </p>
         </div>
       </div>
 
-      {/* Radar Results / History */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold flex items-center gap-2">
-          <LocateFixed className="h-4 w-4 text-emerald-500" /> Latest Scan Results
+      {/* 2. Live Agent Intercept Logs */}
+      <div className="rounded-2xl border border-border/80 bg-[#09090b] shadow-inner p-1 flex flex-col h-[500px]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-muted/20 rounded-t-xl">
+          <div className="flex items-center gap-2">
+            <Activity className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-mono font-semibold tracking-widest text-emerald-500 uppercase">Live Intercept Stream</span>
+          </div>
+          <span className="text-[10px] text-muted-foreground font-mono bg-black/50 px-2 py-0.5 rounded border border-border/50">agent.radar.sys</span>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-[11px] leading-relaxed hidden-scrollbar" style={{ scrollbarWidth: 'none' }}>
+          {(!radarLogs || radarLogs.length === 0) ? (
+            <div className="h-full flex flex-col items-center justify-center text-muted-foreground/30 space-y-3">
+              <Database className="h-8 w-8 opacity-20" />
+              <p className="tracking-widest uppercase text-[10px]">Awaiting Signal Stream</p>
+            </div>
+          ) : (
+            radarLogs.map((log: any, i: number) => (
+              <div key={i} className="flex items-start gap-3 animate-in fade-in slide-in-from-left-2 duration-300">
+                <span className="text-zinc-600 shrink-0 w-8 table-cell align-top">{log.ts}</span>
+                <span className={cx(
+                  "break-words",
+                  log.text.includes('complete') || log.text.includes('ready') ? "text-emerald-400 font-bold" :
+                    log.text.includes('AWS') || log.text.includes('DynamoDB') || log.text.includes('Tavily') ? "text-cyan-400" :
+                      log.text.includes('Intercepting') ? "text-amber-400" :
+                        "text-zinc-300"
+                )}>
+                  <span className="text-zinc-600 mr-2">❯</span>{log.text}
+                </span>
+              </div>
+            ))
+          )}
+          {radarScanning && (
+            <div className="flex gap-3 text-emerald-500/70 animate-pulse mt-4">
+              <span className="text-zinc-600 shrink-0 w-8">...</span>
+              <span><span className="text-emerald-500/30 mr-2">❯</span>Processing signal array</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Threat Matrix (Results) */}
+      <div className="rounded-2xl border border-border/80 bg-card flex flex-col p-6 h-[500px] overflow-y-auto shadow-sm hidden-scrollbar" style={{ scrollbarWidth: 'none' }}>
+        <h3 className="text-sm font-semibold mb-5 flex items-center gap-2 border-b border-border/40 pb-3">
+          <Layers className="h-4 w-4 text-primary" /> Threat Matrix & Memory Delta
         </h3>
+
         {!radarResult ? (
-          <div className="h-full min-h-[250px] rounded-xl border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground/50 p-6 text-center">
-            <Search className="h-8 w-8 mb-3 opacity-20" />
-            <p className="text-xs uppercase tracking-widest font-semibold">No recent scans</p>
-            <p className="text-xs max-w-[200px] mt-2">Trigger a manual scan to see competitive deltas plotted here.</p>
+          <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground/40 text-center">
+            <Target className="h-10 w-10 mb-3 opacity-20" />
+            <p className="text-xs uppercase tracking-widest font-semibold">Matrix Offline</p>
+            <p className="text-[10px] max-w-[200px] mt-2">Data will render here once the watchdog completes a pass.</p>
           </div>
         ) : (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
+            {/* Essential Metrics */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-border bg-card p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Market Trend</p>
-                <div className="flex items-center gap-2">
-                  {radarResult.delta.market_trend === 'RISING' ? <TrendingUp className="h-4 w-4 text-emerald-500" /> :
-                    radarResult.delta.market_trend === 'FALLING' ? <TrendingDown className="h-4 w-4 text-red-500" /> :
-                      <Minus className="h-4 w-4 text-muted-foreground" />}
-                  <span className={cx("text-base font-bold",
+              <div className="bg-muted/40 rounded-xl p-4 border border-border/60 shadow-inner">
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><TrendingUp className="h-3 w-3" /> Market Trend</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className={cx("text-xl font-black tracking-tight",
                     radarResult.delta.market_trend === 'RISING' ? 'text-emerald-500' :
-                      radarResult.delta.market_trend === 'FALLING' ? 'text-red-500' : 'text-muted-foreground'
+                      radarResult.delta.market_trend === 'FALLING' ? 'text-rose-500' : 'text-foreground'
                   )}>{radarResult.delta.market_trend}</span>
                 </div>
               </div>
-              <div className="rounded-xl border border-border bg-card p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Sentiment</p>
-                <p className="text-base font-bold">{radarResult.comprehend_data.sentiment} ({radarResult.comprehend_data.market_confidence}%)</p>
+
+              <div className="bg-muted/40 rounded-xl p-4 border border-border/60 shadow-inner">
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><Activity className="h-3 w-3" /> Sentiment Shift</p>
+                <div className="mt-2">
+                  <p className="text-lg font-bold text-foreground leading-none">{radarResult.comprehend_data.sentiment}</p>
+                  <p className="text-[10px] text-muted-foreground font-mono mt-1">Confidence: {radarResult.comprehend_data.market_confidence}%</p>
+                </div>
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Competitor Matrix</p>
-              <div className="space-y-2">
-                {radarResult.delta.new_competitors.length > 0 && (
-                  <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg">
-                    <Building2 className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+            {/* Entity Matrix */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Detected Competitors</p>
+                <Badge variant="secondary" className="text-[10px] font-mono">{radarResult.comprehend_data.competitor_names.length} Tracked</Badge>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {radarResult.comprehend_data.competitor_names.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic">No competitors detected in this scan.</p>
+                ) : (
+                  radarResult.comprehend_data.competitor_names.map((name: string, i: number) => (
+                    <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/40 border border-border/80 rounded-md shadow-sm">
+                      <Building2 className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs font-semibold">{name}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Deltas & Alerts */}
+            <div className="space-y-3 pt-4 border-t border-border/40">
+              {radarResult.delta.new_competitors.length > 0 && (
+                <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 shadow-sm animate-pulse">
+                  <div className="flex items-start gap-3">
+                    <Users className="h-5 w-5 text-rose-500 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-semibold text-red-500">New Rivals Detected</p>
-                      <p className="text-xs text-red-400 mt-0.5">{radarResult.delta.new_competitors.join(', ')}</p>
+                      <p className="text-sm font-bold text-rose-500">New Rivals Detected</p>
+                      <p className="text-xs text-rose-400 mt-1 font-medium">{radarResult.delta.new_competitors.join(', ')}</p>
                     </div>
                   </div>
-                )}
-                <div className="flex items-center gap-2 p-1">
-                  <span className="text-xs text-muted-foreground">Total Tracked Entities:</span>
-                  <span className="text-xs font-bold">{radarResult.comprehend_data.competitor_names.length}</span>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {radarResult.alert_fired && (
-              <div className="rounded-xl border border-red-500/50 bg-red-500/5 p-4 flex items-center gap-3">
-                <Activity className="h-5 w-5 text-red-500 shrink-0 animate-pulse" />
-                <div>
-                  <p className="text-sm font-semibold text-red-500">SNS Alert Dispatched</p>
-                  <p className="text-xs text-red-400/80">Market shift threshold breached. Email notification sent.</p>
+              {radarResult.alert_fired && (
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <Activity className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 animate-pulse" />
+                    <div>
+                      <p className="text-sm font-bold text-amber-500">AWS SNS Alert Fired</p>
+                      <p className="text-[10px] text-amber-500/80 mt-1 leading-relaxed">Autonomous event dispatched to campaign stakeholders due to competitor influx or severe sentiment drop.</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -285,7 +373,7 @@ export default function CampaignArchitectPage() {
   // ── Detail View ──
   if (activeCampaign) {
     return (
-      <div className="flex-1 space-y-6 p-4 md:p-8 max-w-[1400px] mx-auto">
+      <div className="flex-1 space-y-6 p-4 md:p-8 min-w-0">
         {/* Header Block */}
         <div className="flex items-start justify-between">
           <div className="flex gap-4">
@@ -365,10 +453,13 @@ export default function CampaignArchitectPage() {
 
   // ── List View ──
   return (
-    <div className="flex-1 space-y-8 p-4 md:p-10 max-w-[1400px] mx-auto">
+    <div className="flex-1 space-y-8 p-4 md:p-8 min-w-0">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Campaign Architect</h1>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+            <Layers className="h-8 w-8 text-primary" />
+            Campaign Architect
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">Design data-grounded campaigns and deploy autonomous rival watchdogs.</p>
         </div>
         <Button onClick={() => setIsCreating(true)} disabled={isCreating} size="lg" className="rounded-full shadow-lg">
