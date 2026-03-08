@@ -41,4 +41,4 @@ To run this project, you must set the following secrets in your Hugging Face Spa
 - (Add any other keys your .env.example requires)
 
 ---
-*Maintained by Kesavan2006*
+*Maintained by Kesavan G*
